@@ -19,7 +19,7 @@ GOAL = 100
 STATES = np.arange(GOAL + 1)
 
 # probability of head
-HEAD_PROB = 0.4
+HEAD_PROB = 0.45
 
 
 def figure_4_3():
@@ -75,7 +75,7 @@ def figure_4_3():
     plt.xlabel('Capital')
     plt.ylabel('Final policy (stake)')
 
-    plt.savefig('../images/figure_4_3.png')
+    plt.savefig('../images/figure_4_3--'+str(HEAD_PROB)+'.png')
     plt.close()
 
 

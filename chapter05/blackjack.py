@@ -364,7 +364,7 @@ def figure_5_3():
 
 
 if __name__ == '__main__':
-    # figure_5_1()
-    figure_5_2()
+    figure_5_1()
+    # figure_5_2()
     # figure_5_3()
 

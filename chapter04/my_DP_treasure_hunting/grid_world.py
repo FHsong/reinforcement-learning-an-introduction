@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.table import Table
 
-# matplotlib.use('Agg')
+matplotlib.use('Agg')
 
 WORLD_SIZE = 4
 # left, up, right, down
@@ -96,6 +96,8 @@ def figure_4_1():
     # Figure 4.1 actually uses out-of-place version.
     _, asycn_iteration = compute_state_value(in_place=True)
     values, sync_iteration = compute_state_value(in_place=False)
+    print(values)
+
     draw_image(np.round(values, decimals=2))
     print('In-place: {} iterations'.format(asycn_iteration))
     print('Synchronous: {} iterations'.format(sync_iteration))

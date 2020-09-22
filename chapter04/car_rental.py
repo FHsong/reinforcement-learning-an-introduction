@@ -13,6 +13,8 @@ import numpy as np
 import seaborn as sns
 from scipy.stats import poisson
 
+sns.boxplot()
+
 matplotlib.use('Agg')
 
 # maximum # of cars in each location
@@ -55,7 +57,8 @@ poisson_cache = dict()
 
 def poisson_probability(n, lam):
     global poisson_cache
-    key = n * 10 + lam
+    key = n * 10 + lam  # n = 0,1,...,10
+    print(key)
     if key not in poisson_cache:
         poisson_cache[key] = poisson.pmf(n, lam)
     return poisson_cache[key]
@@ -79,12 +82,12 @@ def expected_return(state, action, state_value, constant_returned_cars):
     returns -= MOVE_CAR_COST * abs(action)
 
     # moving cars
-    NUM_OF_CARS_FIRST_LOC = min(state[0] - action, MAX_CARS)
-    NUM_OF_CARS_SECOND_LOC = min(state[1] + action, MAX_CARS)
+    NUM_OF_CARS_FIRST_LOC = min(state[0] - action, MAX_CARS)   # state[0]为第一个位置的车辆数
+    NUM_OF_CARS_SECOND_LOC = min(state[1] + action, MAX_CARS)  # state[1]为第二个位置的车辆数
 
     # go through all possible rental requests
-    for rental_request_first_loc in range(POISSON_UPPER_BOUND):
-        for rental_request_second_loc in range(POISSON_UPPER_BOUND):
+    for rental_request_first_loc in range(POISSON_UPPER_BOUND):        # for 0: 11
+        for rental_request_second_loc in range(POISSON_UPPER_BOUND):   # for 0: 11
             # probability for current combination of rental requests
             prob = poisson_probability(rental_request_first_loc, RENTAL_REQUEST_FIRST_LOC) * \
                 poisson_probability(rental_request_second_loc, RENTAL_REQUEST_SECOND_LOC)
@@ -124,17 +127,20 @@ def expected_return(state, action, state_value, constant_returned_cars):
 def figure_4_2(constant_returned_cars=True):
     value = np.zeros((MAX_CARS + 1, MAX_CARS + 1))
     policy = np.zeros(value.shape, dtype=np.int)
+    print(np.flipud(policy))
 
     iterations = 0
     _, axes = plt.subplots(2, 3, figsize=(40, 20))
     plt.subplots_adjust(wspace=0.1, hspace=0.2)
     axes = axes.flatten()
     while True:
-        fig = sns.heatmap(np.flipud(policy), cmap="YlGnBu", ax=axes[iterations])
+        print(np.flipud(policy))
+        fig = sns.heatmap(np.flipud(policy), cmap="YlGnBu", ax=axes[iterations], annot=True)
         fig.set_ylabel('# cars at first location', fontsize=30)
         fig.set_yticks(list(reversed(range(MAX_CARS + 1))))
         fig.set_xlabel('# cars at second location', fontsize=30)
         fig.set_title('policy {}'.format(iterations), fontsize=30)
+
 
         # policy evaluation (in-place)
         while True:
@@ -166,7 +172,7 @@ def figure_4_2(constant_returned_cars=True):
         print('policy stable {}'.format(policy_stable))
 
         if policy_stable:
-            fig = sns.heatmap(np.flipud(value), cmap="YlGnBu", ax=axes[-1])
+            fig = sns.heatmap(np.flipud(value), cmap="YlGnBu", ax=axes[-1], annot=True)
             fig.set_ylabel('# cars at first location', fontsize=30)
             fig.set_yticks(list(reversed(range(MAX_CARS + 1))))
             fig.set_xlabel('# cars at second location', fontsize=30)
