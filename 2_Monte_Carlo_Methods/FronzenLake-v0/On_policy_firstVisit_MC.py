@@ -12,17 +12,20 @@ class MC_ES:
 
         self.state_action_count_list = []
 
-        self.episode_number = 500000
+        self.episode_number = 1000000
 
         self.state_list = None
         self.action_list = None
         self.reward_list = None
 
+        self.epsilon = 0.1            # ε-soft policies
+
+
 
     def run(self):
         self.initialization()
         for episode in range(1, self.episode_number):
-            print('Episode: {}'.format(episode))
+
             self.generate_one_episode()
             # print(self.state_list)
             # print(self.reward_list, '\n')
@@ -43,11 +46,20 @@ class MC_ES:
                     # self.Returns[S_t][A_t].append(G)
                     # self.Q_table[S_t][A_t] = np.average(self.Returns[S_t][A_t])
                     self.state_action_count_list[S_t][A_t] += 1
-                    self.Q_table[S_t][A_t] = self.Q_table[S_t][A_t] +\
+                    self.Q_table[S_t][A_t] = self.Q_table[S_t][A_t] + \
                                              (1. / self.state_action_count_list[S_t][A_t]) * (G - self.Q_table[S_t][A_t])
-                    self.pi[S_t] = np.argmax(self.Q_table[S_t])
 
+                A_star = np.argmax(self.Q_table[S_t])
+                for a in range(self.env.action_space.n):
+                    if a == A_star:
+                        self.pi[S_t][a] = 1 - self.epsilon + self.epsilon / self.env.action_space.n
+                    else:
+                        self.pi[S_t][a] = self.epsilon / self.env.nA
+
+            print('Episode: {} | Total reward: {}'.format(episode, G))
         print(self.pi)
+        print([np.argmax(l) for l in self.pi])
+
 
 
 
@@ -55,18 +67,16 @@ class MC_ES:
         self.state_list = []
         self.action_list = []
         self.reward_list = []
-        state = env.reset()
+        state = self.env.reset()
         while True:
             # env.render()
-            action = self.pi[state]
+            action_P = np.array(self.pi[state])
+            action = np.random.choice(np.arange(self.env.action_space.n), p=action_P.ravel())
             next_state, reward, done, _ = self.env.step(action)
             self.load_one_transmission(state, action, reward)
             state = next_state
             if done:
                 break
-
-
-
 
 
 
@@ -78,7 +88,11 @@ class MC_ES:
 
 
     def initialization(self):
-        self.pi = [np.random.choice(self.env.action_space.n) for _ in range(self.env.nS)]
+        self.pi = [[1 - self.epsilon + self.epsilon / self.env.env.action_space.n] for _ in range(self.env.nS)]  # 选中贪心策略的概率
+        for s in range(self.env.nS):
+            for a in range(self.env.env.action_space.n - 1):
+                self.pi[s].append(self.epsilon / self.env.env.action_space.n)
+
         for s in range(self.env.nS):
             s_table = [1. for _ in range(self.env.action_space.n)]
             self.Q_table.append(s_table)

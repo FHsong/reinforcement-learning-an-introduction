@@ -1,3 +1,5 @@
+# On-policy first-visit MC control (for "epsilon-soft policies) Page 101
+
 import numpy as np
 import gym, time
 from maze_env import MazeEnv
@@ -13,20 +15,19 @@ class MC_ES:
 
         self.state_action_count_list = []
 
-        self.episode_number = 10000
+        self.episode_number = 100000
 
         self.state_list = None
         self.action_list = None
         self.reward_list = None
 
-        self.epsilon = 0.9
+        self.epsilon = 0.1            # ε-soft policies
         self.state_to_gridState = []  # 从单个数字状态到网格坐标的映射，如 0 -> [0, 0]
 
 
     def run(self):
         self.initialization()
         for episode in range(1, self.episode_number):
-            print('Episode: {}'.format(episode))
             self.generate_one_episode()
             # print(self.state_list)
             # print(self.action_list)
@@ -51,7 +52,15 @@ class MC_ES:
                     self.state_action_count_list[S_t][A_t] += 1
                     self.Q_table[S_t][A_t] = self.Q_table[S_t][A_t] +\
                                              (1. / self.state_action_count_list[S_t][A_t]) * (G - self.Q_table[S_t][A_t])
-                    self.pi[S_t] = np.argmax(self.Q_table[S_t])
+
+                    A_star= np.argmax(self.Q_table[S_t])
+                    for a in range(self.env.nA):
+                        if a == A_star:
+                            self.pi[S_t][a] = 1 - self.epsilon + self.epsilon / self.env.nA
+                        else:
+                            self.pi[S_t][a] = self.epsilon / self.env.nA
+
+            print('Episode: {} | Total reward: {}'.format(episode, G))
 
         return self.pi
 
@@ -64,10 +73,9 @@ class MC_ES:
         while True:
             # env.render()
             state = self.state_to_gridState.index(state_grid)
-            if np.random.random() < self.epsilon:
-                action = self.pi[state]
-            else:
-                action = np.random.randint(0, self.env.nA)
+
+            action_P = np.array(self.pi[state])
+            action = np.random.choice(np.arange(self.env.nA), p=action_P.ravel())
 
             next_state, reward, done = self.env.step(state_grid, action)
             self.load_one_transmission(state, action, reward)
@@ -85,7 +93,11 @@ class MC_ES:
 
 
     def initialization(self):
-        self.pi = [np.random.choice(self.env.nA) for _ in range(self.env.nS)]
+        self.pi = [[1 - self.epsilon + self.epsilon/self.env.nA] for _ in range(self.env.nS)]  # 选中贪心策略的概率
+        for s in range(self.env.nS):
+            for a in range(self.env.nA-1):
+                self.pi[s].append(self.epsilon/self.env.nA)
+
         for i in range(self.env.GRID_SIZE):
             for j in range(self.env.GRID_SIZE):
                 self.state_to_gridState.append([i, j])
@@ -114,12 +126,13 @@ if __name__ == '__main__':
     time.sleep(0.5)
     while True:
         state = mc_es.state_to_gridState.index(state_grid)
-        action = mc_es.pi[state]
+        action_P = np.array(mc_es.pi[state])
+        action = np.random.choice([a for a in range(mc_es.env.nA)], p=action_P.ravel())
 
         next_state, reward, done = mc_es.env.step(state_grid, action)
         state_grid = next_state
         env.current_state = next_state
         env.render()
-        time.sleep(0.51)
+        time.sleep(0.5)
         if done:
             break
