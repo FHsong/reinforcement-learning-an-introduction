@@ -2,9 +2,9 @@
 
 import numpy as np
 import gym, time
-from maze_env import MazeEnv
+from MC_maze_env import MazeEnv
 
-class MC_ES:
+class OnPolice_MC:
     def __init__(self, env):
         self.env = env
         self.theta = 1e-4  # A small positive number determining the accuracy of estimation
@@ -15,7 +15,7 @@ class MC_ES:
 
         self.state_action_count_list = []
 
-        self.episode_number = 100000
+        self.episode_number = 10000
 
         self.state_list = None
         self.action_list = None
@@ -29,9 +29,6 @@ class MC_ES:
         self.initialization()
         for episode in range(1, self.episode_number):
             self.generate_one_episode()
-            # print(self.state_list)
-            # print(self.action_list)
-            # print(self.reward_list, '\n')
 
             state_action_list = []
             for t in range(len(self.state_list)):
@@ -71,7 +68,6 @@ class MC_ES:
         self.reward_list = []
         state_grid = env.reset()
         while True:
-            # env.render()
             state = self.state_to_gridState.index(state_grid)
 
             action_P = np.array(self.pi[state])
@@ -84,17 +80,15 @@ class MC_ES:
                 break
 
 
-
     def load_one_transmission(self, state, action, reward):
         self.state_list.append(state)
         self.action_list.append(action)
         self.reward_list.append(reward)
 
 
-
     def initialization(self):
-        self.pi = [[1 - self.epsilon + self.epsilon/self.env.nA] for _ in range(self.env.nS)]  # 选中贪心策略的概率
-        for s in range(self.env.nS):
+        self.pi = [[1 - self.epsilon + self.epsilon/self.env.nA] for _ in range(self.env.nS)]  # 选中贪心策略的概率 1-ε+ε/|A(s)|
+        for s in range(self.env.nS):  # 初始其他动作的概率 ε/|A(s)|
             for a in range(self.env.nA-1):
                 self.pi[s].append(self.epsilon/self.env.nA)
 
@@ -103,20 +97,17 @@ class MC_ES:
                 self.state_to_gridState.append([i, j])
 
         for s in range(self.env.nS):
-            s_table = [1. for _ in range(self.env.nA)]
-            self.Q_table.append(s_table)
+            self.Q_table.append([1.] * self.env.nA)
 
-            a_list = [[] for _ in range(self.env.nA)]
-            self.Returns.append(a_list)
+            self.Returns.append([] * self.env.nA)
 
-            s_a_count = [0 for _ in range(self.env.nA)]
-            self.state_action_count_list.append(s_a_count)
+            self.state_action_count_list.append([0.] * self.env.nA)
 
 
 
 if __name__ == '__main__':
     env = MazeEnv()
-    mc_es = MC_ES(env)
+    mc_es = OnPolice_MC(env)
     pi = mc_es.run()
     print(pi)
 

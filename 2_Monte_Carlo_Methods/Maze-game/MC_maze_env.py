@@ -1,5 +1,4 @@
 import pygame, time, random
-import sys
 import math, copy
 from pygame.locals import *
 import numpy as np
@@ -36,7 +35,7 @@ class MazeEnv():
                         np.array([1, 0])]
         self.nA = len(self.action_space)
 
-        self.trap_space = [[0, 3], [1, 3], [2, 0], [2, 1], [4, 2], [4, 3], [4, 4]]
+        self.trap_space = [[0, 3], [1, 3], [2, 0], [2, 1], [4, 2], [4, 3], [4, 4]] # 不包括宝藏的位置
         self.treasure_space = [[2, 4]]
         self.terminate_space = [[0, 3], [1, 3], [2, 0], [2, 1], [2, 4], [4, 2], [4, 3], [4, 4]]
 
@@ -49,12 +48,16 @@ class MazeEnv():
 
 
     def reset(self):
-        self.current_state = [0, 0]
+        temp = copy.deepcopy(list(self.state_space.keys()))
+        temp = [list(state) for state in temp]
+        for state in self.terminate_space:
+            temp.remove(state)
+
+        self.current_state = temp[np.random.randint(0, len(temp))] # 随机初始化非终止状态
         return self.current_state
 
 
     def render(self):
-        time.sleep(0.05)
         self.window.fill(WHITE)
         self.getEvent()
 
@@ -80,8 +83,6 @@ class MazeEnv():
         pygame.draw.circle(self.window, RED, self.state_space[(self.current_state[0], self.current_state[1])], 50)
 
         pygame.display.flip()
-
-
 
     def step(self, state, action):
         next_state = (np.array(state) + self.ACTIONS[action]).tolist()
@@ -112,10 +113,6 @@ class MazeEnv():
 
 
     def createTrap(self):
-        # for trap in self.trap_space:
-        #
-        #     pygame.draw.rect(self.window, BLAKE, Rect((300, 0), (100, 100)))
-
         pygame.draw.rect(self.window, BLAKE, Rect((300, 0), (100, 100)))
         pygame.draw.rect(self.window, BLAKE, Rect((300, 100), (100, 100)))
         pygame.draw.rect(self.window, BLAKE, Rect((0, 200), (100, 100)))
@@ -139,19 +136,9 @@ class MazeEnv():
         return states
 
 
-
     def getEvent(self):
         #获取所有事件
         eventList = pygame.event.get()
         for event in eventList:
             if event.type == pygame.QUIT:
                 exit()
-
-
-
-
-
-
-
-
-

@@ -26,7 +26,7 @@ class MazeEnv():
 
         self.GRID_SIZE = 5
 
-        self.state_space = self.get_state_space()  # 其中key为状态编号对，如[0, 0]，其值为网格的实际坐标
+        self.state_space = self.get_state_space()  # 其中key为状态编号，其值为网格的实际坐标
         self.nS = len(self.state_space)
         self.action_space = [0, 1, 2, 3]
 
@@ -36,31 +36,21 @@ class MazeEnv():
                         np.array([1, 0])]
         self.nA = len(self.action_space)
 
-
         self.trap_space = [[0, 3], [1, 3], [2, 0], [2, 1], [4, 2], [4, 3], [4, 4]]
         self.treasure_space = [[2, 4]]
-        self.terminate_space = [[0, 3], [1, 3], [2, 0], [2, 1], [2, 4], [4, 2], [4, 3], [4, 4]]
-        self.non_terminate_state = self.get_non_terminate_state()
+        self.terminate_space = [[0, 3], [1, 3], [2, 0], [2, 1], [2, 4], [4, 2], [4, 3], [4, 4]] #
 
         self.transition = {}
 
         self.current_state = None  # 当前状态
 
-        self.robot_image = pygame.image.load('../Maze-game/img/robot.jpg')
-        self.treasure_image = pygame.image.load('../Maze-game/img/treasure.jpg')
+        self.robot_image = pygame.image.load('./img/robot.jpg')
+        self.treasure_image = pygame.image.load('./img/treasure.jpg')
 
 
     def reset(self):
         self.current_state = [0, 0]
         return self.current_state
-
-
-    def get_non_terminate_state(self):
-        non_terminate_state = list(self.state_space.keys())
-        non_terminate_state = [[state[0], state[1]] for state in non_terminate_state]
-        for t_state in self.terminate_space:
-            non_terminate_state.remove([t_state[0], t_state[1]])
-        return non_terminate_state
 
 
     def render(self):

@@ -2,7 +2,7 @@
 
 import numpy as np
 import gym, time
-from maze_env import MazeEnv
+from MC_maze_env import MazeEnv
 
 class MC_ES:
     def __init__(self, env):
@@ -13,7 +13,7 @@ class MC_ES:
         self.Q_table = []
         self.Returns = []
 
-        self.state_action_count_list = []
+        self.state_action_count_list = [] # 记录每个状态动作对被更新的次数
 
         self.episode_number = 10000
 
@@ -30,9 +30,11 @@ class MC_ES:
         for episode in range(1, self.episode_number):
             print('Episode: {}'.format(episode))
             self.generate_one_episode()
-            # print(self.state_list)
-            # print(self.action_list)
-            # print(self.reward_list, '\n')
+            for i in range(len(self.state_list)):
+                print('[',self.state_list[i],',', self.action_list[i], ',', self.reward_list[i], ']',end='')
+
+
+
 
             state_action_list = []
             for t in range(len(self.state_list)):
@@ -62,9 +64,8 @@ class MC_ES:
         self.state_list = []
         self.action_list = []
         self.reward_list = []
-        state_grid = env.reset()
+        state_grid = self.env.reset()
         while True:
-            # env.render()
             state = self.state_to_gridState.index(state_grid)
             if np.random.random() < self.epsilon:
                 action = self.pi[state]
@@ -93,14 +94,11 @@ class MC_ES:
                 self.state_to_gridState.append([i, j])
 
         for s in range(self.env.nS):
-            s_table = [1. for _ in range(self.env.nA)]
-            self.Q_table.append(s_table)
+            self.Q_table.append([1.] * self.env.nA)
 
-            a_list = [[] for _ in range(self.env.nA)]
-            self.Returns.append(a_list)
+            self.Returns.append([] * self.env.nA)
 
-            s_a_count = [0 for _ in range(self.env.nA)]
-            self.state_action_count_list.append(s_a_count)
+            self.state_action_count_list.append([0.] * self.env.nA)
 
 
 

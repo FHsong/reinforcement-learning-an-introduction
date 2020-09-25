@@ -25,7 +25,6 @@ class MC_ES:
     def run(self):
         self.initialization()
         for episode in range(1, self.episode_number):
-
             self.generate_one_episode()
             # print(self.state_list)
             # print(self.reward_list, '\n')
