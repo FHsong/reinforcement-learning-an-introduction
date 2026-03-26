@@ -25,41 +25,8 @@ class OnPolice_MC:
         self.state_to_gridState = []  # 从单个数字状态到网格坐标的映射，如 0 -> [0, 0]
 
 
-    def run(self):
-        self.initialization()
-        for episode in range(1, self.episode_number):
-            self.generate_one_episode()
-
-            state_action_list = []
-            for t in range(len(self.state_list)):
-                (s, a) = (self.state_list[t], self.action_list[t])
-                state_action_list.append((s, a))
-
-            G = 0.
-            for t in range(len(self.state_list)-1, -1, -1):
-                G = self.discount * G + self.reward_list[t]
-
-                state_action_list.pop()
-                S_t = self.state_list[t]
-                A_t = self.action_list[t]
-                if (S_t, A_t) not in state_action_list:
-                    # self.Returns[S_t][A_t].append(G)
-                    # self.Q_table[S_t][A_t] = np.average(self.Returns[S_t][A_t])
-                    # 增量更新
-                    self.state_action_count_list[S_t][A_t] += 1
-                    self.Q_table[S_t][A_t] = self.Q_table[S_t][A_t] +\
-                                             (1. / self.state_action_count_list[S_t][A_t]) * (G - self.Q_table[S_t][A_t])
-
-                    A_star= np.argmax(self.Q_table[S_t])
-                    for a in range(self.env.nA):
-                        if a == A_star:
-                            self.pi[S_t][a] = 1 - self.epsilon + self.epsilon / self.env.nA
-                        else:
-                            self.pi[S_t][a] = self.epsilon / self.env.nA
-
-            print('Episode: {} | Total reward: {}'.format(episode, G))
-
-        return self.pi
+    def run(self): # 实现核心算法
+        pass
 
 
     def generate_one_episode(self):
