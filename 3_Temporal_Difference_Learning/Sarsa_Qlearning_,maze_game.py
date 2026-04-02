@@ -79,7 +79,13 @@ class MazeGame:
 
 
     def choose_action_e_greedy(self, state):
-            pass
+            if np.random.random() > self.epsilon:  # 选择最大Q值的动作
+                # 若有多个相同的最大Q值，则随机选择
+                action = np.random.choice(
+                    [action_ for action_, value_ in enumerate(self.Q_table[state]) if value_ == np.max(self.Q_table[state])])
+            else:  # 随机选择动作
+                action = np.random.randint(0, self.env.nA)
+            return action
 
 
     # 如果该状态的所有q值都是相等的，那么当选择最大的值的index时，总会选择第一个
