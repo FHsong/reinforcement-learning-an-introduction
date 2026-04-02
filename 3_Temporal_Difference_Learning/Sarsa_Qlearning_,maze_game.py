@@ -75,48 +75,11 @@ class MazeGame:
 
 
     def Q_learning_run(self, runTime):
-        print('----------- Q-learning -----------')
-        total_run = np.zeros(self.episode_number)
-
-        for r in tqdm(range(runTime)):
-            running_reward = None
-            running_reward_list = []
-            self.initialization()
-            for episode in range(self.episode_number):
-                total_reward = 0
-                state_grid = self.env.reset()
-                self.env.render()
-                while True:
-                    state_index = self.state_to_gridState.index(state_grid)
-                    action = self.choose_action_e_greedy(state_index)
-                    next_state, reward, done = self.env.step(state_grid, action)
-                    total_reward += reward
-
-                    next_state_index = self.state_to_gridState.index(next_state)
-                    self.learn('Q-learning', state_index, action, reward, next_state_index)
-
-                    state_grid = next_state
-                    self.env.current_state = state_grid
-                    self.env.render()
-                    if done:
-                        time.sleep(0.5)
-                        break
-                # 每一次迭代获得的总收益total_reward,会以0.01的份额加入到running_reward。(原代码这里total_reward用了r，个人认为是total_reward更合适)
-                running_reward = total_reward if running_reward is None else running_reward * 0.99 + total_reward * 0.01
-                running_reward_list.append(running_reward)
-            total_run += np.asarray(running_reward_list)
-                # print('Episode [{}/{}] | Total reward: {} | Running reward: {:5f}'.
-                #       format(episode, self.episode_number, total_reward, running_reward))
-        total_run /= runTime
-        return total_run
+        pass
 
 
     def choose_action_e_greedy(self, state):
-            if np.random.random() > self.epsilon:  # 选择最大Q值的动作
-                action = self.getRandomAction_withSame_Q(state)
-            else:  # 随机选择动作
-                action = np.random.randint(0, self.env.nA)
-            return action
+            pass
 
 
     # 如果该状态的所有q值都是相等的，那么当选择最大的值的index时，总会选择第一个
